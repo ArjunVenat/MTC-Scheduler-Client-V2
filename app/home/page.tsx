@@ -1,11 +1,10 @@
+import React from 'react'
 import Image from "next/image";
-import React from "react";
-import Router, { useRouter } from "next/router";
+import { FaHome, FaInfo, FaBriefcase } from 'react-icons/fa';
+import Header from '../Components/Header';
+import LargeTable from '../Components/LargeTable';
 
-import Header from "./Components/Header";
-import LargeTable from "./Components/LargeTable";
-
-export default function Root() {
+export default function Home() {
   return (
     <div className="relative h-screen">
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-white via-gray-200 to-gray-400 opacity-40"></div>
