@@ -1,6 +1,7 @@
 import React from 'react'
 import Header from '../Components/Header';
 import LargeTable from '../Components/LargeTable';
+import HeroPage from "@/app/Components/HeroPage";
 
 export default function Home() {
   return (
@@ -10,7 +11,7 @@ export default function Home() {
         <Header setPage={"home"}/>
         <div className="flex-grow overflow-hidden">
           <div className="h-full overflow-y-auto">
-            <LargeTable />
+              <HeroPage />
           </div>
         </div>
       </div>
