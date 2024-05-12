@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '../Components/Header';
-import LargeTable from '../Components/LargeTable';
+import WorkersTable from '../Components/Table';
 import HeroPage from "@/app/Components/HeroPage";
 
 export default function Home() {
