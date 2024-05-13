@@ -2,8 +2,8 @@ import React from 'react'
 import Image from "next/image";
 import { FaHome, FaInfo, FaBriefcase } from 'react-icons/fa';
 import Header from '../Components/Header';
-import WorkersTable from '../Components/Table';
-import Table from "../Components/Table";
+import WorkersTable from '../Components/QuestionsTable';
+import QuestionsTable from "../Components/QuestionsTable";
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
           <Header setPage={"clean-upload"}/>
         <div className="flex-grow overflow-hidden">
           <div className="h-full overflow-y-auto">
-              <Table type={"workers"}/>
+              <QuestionsTable type={"workers"}/>
           </div>
         </div>
       </div>
