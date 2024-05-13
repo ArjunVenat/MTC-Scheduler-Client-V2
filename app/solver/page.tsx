@@ -2,7 +2,7 @@ import React from 'react'
 import Image from "next/image";
 import { FaHome, FaInfo, FaBriefcase } from 'react-icons/fa';
 import Header from '../Components/Header';
-import QuestionsTable from '../Components/QuestionsTable';
+import QuestionsTable from '../Components/Table';
 
 export default function Home() {
   return (

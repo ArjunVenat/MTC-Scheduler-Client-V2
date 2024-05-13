@@ -1,6 +1,6 @@
 import React from 'react'
 import Header from '../Components/Header';
-import QuestionsTable from '../Components/QuestionsTable';
+import Table from '../Components/Table';
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
           <Header setPage={"params"}/>
         <div className="flex-grow overflow-hidden">
           <div className="h-full overflow-y-auto">
-            <QuestionsTable type={"workers"}/>
+            <Table type={"workers"}/>
           </div>
         </div>
       </div>

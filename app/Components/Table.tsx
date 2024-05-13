@@ -3,20 +3,21 @@ import React, {useState} from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
+import {Checkbox, TextField, RadioGroup, FormControlLabel, Radio} from "@mui/material";
 
 interface TableInterface {
   type: "questions" | "workers";
   data?: QuestionBodyInterface[] | WorkersBodyInterface[]
 }
 
-export interface QuestionBodyInterface {
+interface QuestionBodyInterface {
   dataCollected: string;
   questionText: string;
   desiredCol: string;
   include: boolean;
 }
 
-export interface WorkersBodyInterface {
+interface WorkersBodyInterface {
     name: string,
     position: string
     creditScore: number,
@@ -29,7 +30,7 @@ interface RowEditFlag {
     isEditing: boolean
 }
 
-export default function QuestionsTable(props: TableInterface) {
+export default function Table(props: TableInterface) {
     const headers: string[] = props.type === "questions" ? ["Data Collected", "Question Text", "Desired Output Column Name", "Include in Model"] : ["Name", "Position", "Social Credit Score", "Prioritize?"];
 
     const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>([
@@ -38,10 +39,21 @@ export default function QuestionsTable(props: TableInterface) {
         {dataCollected: "Ability", questionText: "\"Which of the following courses do feel qualified to help with\"", desiredCol: "\"Qualifications\"", include: false}
     ]);
 
+    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>(
+        [
+            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
+            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
+            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
+            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
+            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
+        ]
+    )
+
     function handleInputChange (row: number, value: string) {
-        setSampleData((currentState) => {
+        console.log(value);
+        setRowEditFlag((currentState) => {
             const updatedData = [...currentState];
-            updatedData[row].desiredCol = value;
+            updatedData[row].currentState = value;
             return updatedData;
         });
     }
@@ -57,6 +69,38 @@ export default function QuestionsTable(props: TableInterface) {
         });
     }
 
+    function handleSaveClick(row: number){
+        console.log(rowEditFlag[row].currentState);
+        setSampleData((currentState: QuestionBodyInterface[]) => {
+            const newState = [...currentState];
+            newState[row] = { ...newState[row], desiredCol: rowEditFlag[row].currentState}
+            return newState;
+        }
+        )
+
+        setRowEditFlag((currentState: RowEditFlag[]) => {
+            const newState = [...currentState];
+            newState[row] = { ...newState[row], isEditing: false};
+            return newState;
+        })
+    }
+
+    function handleDeleteClick(row: number){
+        setRowEditFlag((currentState: RowEditFlag[]) => {
+            const newState = [...currentState];
+            newState[row] = { ...newState[row], isEditing: false, currentState: sampleData[row].desiredCol };
+            return newState;
+        });
+    }
+
+    const handleRadioChange = (row: number, value: number) => {
+        setSampleData2((currentState) => {
+            const newState = [...currentState];
+                newState[row] = { ...newState[row], creditScore: value};
+                return newState;
+            });
+    };
+
     return (
         <div className="flex min-h-screen items-center justify-center bg-white">
             <div className="p-6 overflow-scroll px-0">
@@ -65,46 +109,95 @@ export default function QuestionsTable(props: TableInterface) {
                     <tr>
                         {headers.map((header, i) => (
                             <th key={i} className="border-y border-blue-gray-100 bg-blue-gray-50/50 p-4">
-                                <p className="block antialiased font-sans text-lg text-blue-gray-900 font-normal leading-none opacity-70">{header}</p>
+                                {/*WPI Crimson is #AC2B37*/}
+                                <p className="block antialiased font-sans text-lg text-blue-gray-900 font-bold leading-none opacity-70">{header}</p>
                             </th>
                         ))}
                     </tr>
                     </thead>
                     <tbody>
-                    {sampleData && (sampleData.map((row, i) => (
+                    {props.type === "questions" && sampleData && (sampleData.map((row, i) => (
                         <tr key={i}>
                             <td className="p-4 border-b border-blue-gray-50">
                                 <div className="flex items-center gap-3">
-                                    <p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold">{row.dataCollected}</p>
+                                    <p className="block antialiased font-sans text-md leading-normal text-blue-gray-900 font-normal">{row.dataCollected}</p>
                                 </div>
                             </td>
                             <td className="p-4 border-b border-blue-gray-50">
                                 <div className="flex items-center gap-3">
-                                    <p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold whitespace-normal">{row.questionText}</p>
+                                    <p className="block antialiased font-sans text-md leading-normal text-blue-gray-900 font-normal whitespace-normal">{row.questionText}</p>
                                 </div>
                             </td>
                             <td className="p-4 border-b border-blue-gray-50">
                                 <div className="flex justify-between items-center gap-3">
-                                    {!rowEditFlag[i].isEditing && (<p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold">{row.desiredCol}</p>)}
-                                    {rowEditFlag[i].isEditing && (<input
-                                        type="text"
-                                        className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold bg-transparent border-b-2 border-blue-gray-900 focus:outline-none focus:border-blue-500"
-                                        value={sampleData[i].desiredCol}
+                                    {!rowEditFlag[i].isEditing && (<p className="block antialiased font-sans text-md leading-normal text-blue-gray-900 font-normal">{row.desiredCol}</p>)}
+                                    {rowEditFlag[i].isEditing && (<TextField
+                                        variant="standard"
+                                        value={rowEditFlag[i].isEditing ? rowEditFlag[i].currentState : sampleData[i].desiredCol}
                                         onChange={(e) => handleInputChange(i, e.target.value)}
+                                        sx={{
+                                            '& .MuiInput-underline:after': { borderBottomColor: '#AC2B37' },
+                                        }}
                                     />)}
                                     <div>
                                         {rowEditFlag[i].isEditing && (
-                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl"><SaveIcon/>
+                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleSaveClick(i)}><SaveIcon/>
                                             </button>)}
                                         {rowEditFlag[i].isEditing && (
-                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl"><DeleteIcon/></button>)}
-                                        <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleEditClick(i)}><EditIcon/></button>
+                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleDeleteClick(i)}><DeleteIcon/></button>)}
                                     </div>
+                                    {!rowEditFlag[i].isEditing && (<button className="p-3 hover:bg-slate-200/70 rounded-xl"
+                                              onClick={(e) => handleEditClick(i)}><EditIcon/></button>)}
                                 </div>
                             </td>
                             <td className="p-4 border-b border-blue-gray-50">
                                 <div className="flex justify-between items-center gap-3">
-                                    <p className="block antialiased font-sans text-sm leading-normal text-blue-gray-900 font-bold">{row.include.toString()}</p>
+                                    <Checkbox sx={{color: 'black', '&.Mui-checked': {
+                                            color: "#AC2B37",
+                                        }}} />
+                                </div>
+                            </td>
+                        </tr>
+                    )))}
+
+                    {props.type === "workers" && sampleData2 && (sampleData2.map((row, i) => (
+                        <tr key={i}>
+                            <td className="p-4 border-b border-blue-gray-50">
+                                <div className="flex items-center gap-3">
+                                    <p className="block antialiased font-sans text-md leading-normal text-blue-gray-900 font-normal">{row.name}</p>
+                                </div>
+                            </td>
+                            <td className="p-4 border-b border-blue-gray-50">
+                                <div className="flex items-center gap-3">
+                                    <p className="block antialiased font-sans text-md leading-normal text-blue-gray-900 font-normal whitespace-normal">{row.position}</p>
+                                </div>
+                            </td>
+                            <td className="border-b border-blue-gray-50">
+                                <RadioGroup row={true}>
+                                    {[1, 2, 3, 4, 5].map((value) => (
+                                    <FormControlLabel
+                                        key={value}
+                                        value={value.toString()}
+                                        control={
+                                            <Radio
+                                                checked={sampleData2[i].creditScore === value}
+                                                onClick={(e) => handleRadioChange(i, value)}
+                                                sx={{color: 'gray', '&.Mui-checked': {
+                                                        color: "#AC2B37",
+                                                    }}}
+                                            />
+                                        }
+                                        label={value.toString()}
+                                        labelPlacement="top"
+                                    />
+                                ))}
+                                </RadioGroup>
+                            </td>
+                            <td className="pl-1 pt-4 pb-4 border-b border-blue-gray-50">
+                                <div className="flex justify-between items-center gap-3">
+                                    <Checkbox sx={{color: 'black', '&.Mui-checked': {
+                                            color: "#AC2B37",
+                                        }}} />
                                 </div>
                             </td>
                         </tr>
