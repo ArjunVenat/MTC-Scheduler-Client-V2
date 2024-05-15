@@ -1,6 +1,5 @@
 import React from 'react'
 import Header from '../Components/Header';
-import WorkersTable from '../Components/Table';
 import HeroPage from "@/app/Components/HeroPage";
 
 export default function Home() {
@@ -10,9 +9,9 @@ export default function Home() {
       <div className="relative z-10 h-full flex flex-col">
         <Header setPage={"home"}/>
         <div className="flex-grow overflow-hidden">
-          <div className="h-full overflow-y-auto">
-              <HeroPage />
-          </div>
+            <div className="h-full overflow-y-auto items-center">
+                <HeroPage/>
+            </div>
         </div>
       </div>
     </div>
