@@ -2,7 +2,8 @@
 import React, {useState} from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import DeleteIcon from '@mui/icons-material/Delete';
+import UndoIcon from '@mui/icons-material/Undo';
+import { Tooltip } from "@mui/material";
 import {Checkbox, TextField, RadioGroup, FormControlLabel, Radio} from "@mui/material";
 
 interface TableInterface {
@@ -43,23 +44,7 @@ export default function Table(props: TableInterface) {
         [
             {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
             {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-
-
-        ]
+            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true}]
     )
 
     function handleInputChange (row: number, value: string) {
@@ -155,13 +140,27 @@ export default function Table(props: TableInterface) {
                                     />)}
                                     <div>
                                         {rowEditFlag[i].isEditing && (
-                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleSaveClick(i)}><SaveIcon/>
-                                            </button>)}
+                                            <Tooltip title={"Save"} arrow>
+                                                <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleSaveClick(i)}><SaveIcon/>
+                                                </button>
+                                            </Tooltip>
+                                        )}
                                         {rowEditFlag[i].isEditing && (
-                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleDeleteClick(i)}><DeleteIcon/></button>)}
+                                            <Tooltip title={"Undo"} arrow>
+                                                <button
+                                                    className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleDeleteClick(i)}><UndoIcon/>
+                                                </button>
+                                            </Tooltip>
+                                        )}
+
                                     </div>
-                                    {!rowEditFlag[i].isEditing && (<button className="p-3 hover:bg-slate-200/70 rounded-xl"
-                                              onClick={(e) => handleEditClick(i)}><EditIcon/></button>)}
+                                    {!rowEditFlag[i].isEditing && (
+                                        <Tooltip title={"Edit"}>
+                                            <button className="p-3 hover:bg-slate-200/70 rounded-xl"
+                                                  onClick={(e) => handleEditClick(i)}><EditIcon/>
+                                            </button>
+                                        </Tooltip>
+                                    )}
                                 </div>
                             </td>
                             <td className="p-8 border-b border-blue-gray-50">
