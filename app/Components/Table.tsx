@@ -8,17 +8,17 @@ import {Checkbox, TextField, RadioGroup, FormControlLabel, Radio} from "@mui/mat
 
 interface TableInterface {
   type: "questions" | "workers";
-  data?: QuestionBodyInterface[] | WorkersBodyInterface[]
+  data?: QuestionBodyInterface[] | WorkersBodyInterface[];
+  setTableData: (data: QuestionBodyInterface[] | WorkersBodyInterface[]) => void;
 }
 
-interface QuestionBodyInterface {
-  dataCollected: string;
+export interface QuestionBodyInterface {
   questionText: string;
   desiredCol: string;
   include: boolean;
 }
 
-interface WorkersBodyInterface {
+export interface WorkersBodyInterface {
     name: string,
     position: string
     creditScore: number,
@@ -32,12 +32,12 @@ interface RowEditFlag {
 }
 
 export default function Table(props: TableInterface) {
-    const headers: string[] = props.type === "questions" ? ["Data Collected", "Question Text", "Desired Output Column Name", "Include in Model"] : ["Name", "Position", "Social Credit Score", "Prioritize?"];
+    const headers: string[] = props.type === "questions" ? ["Desired Output Column Name", "Include in Model"] : ["Name", "Position", "Social Credit Score", "Prioritize?"];
 
     const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>([
-        {dataCollected: "Name", questionText: "\"Name\"", desiredCol: "\"Name\"", include: true},
-        {dataCollected: "Position", questionText: "\"Select Your Position\"", desiredCol: "\"Position\"", include: true},
-        {dataCollected: "Ability", questionText: "\"Which of the following courses do feel qualified to help with\"", desiredCol: "\"Qualifications\"", include: false}
+        {questionText: "\"Name\"", desiredCol: "\"Name\"", include: true},
+        {questionText: "\"Select Your Position\"", desiredCol: "\"Position\"", include: true},
+        {questionText: "\"Which of the following courses do feel qualified to help with\"", desiredCol: "\"Qualifications\"", include: false}
     ]);
 
     const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>(
@@ -117,11 +117,11 @@ export default function Table(props: TableInterface) {
                     <tbody>
                     {props.type === "questions" && sampleData && (sampleData.map((row, i) => (
                         <tr key={i}>
-                            <td className="p-8 border-b border-blue-gray-50">
-                                <div className="flex items-center gap-3">
-                                    <p className="block antialiased font-sans text-lg leading-normal text-blue-gray-900 font-normal">{row.dataCollected}</p>
-                                </div>
-                            </td>
+                            {/*<td className="p-8 border-b border-blue-gray-50">*/}
+                            {/*    <div className="flex items-center gap-3">*/}
+                            {/*        <p className="block antialiased font-sans text-lg leading-normal text-blue-gray-900 font-normal">{row.dataCollected}</p>*/}
+                            {/*    </div>*/}
+                            {/*</td>*/}
                             <td className="p-8 border-b border-blue-gray-50">
                                 <div className="flex items-center gap-3">
                                     <p className="block antialiased font-sans text-lg leading-normal text-blue-gray-900 font-normal whitespace-normal">{row.questionText}</p>

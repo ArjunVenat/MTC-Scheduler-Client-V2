@@ -5,14 +5,30 @@ import Table from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from "@mui/icons-material/Send";
+import axios from "axios";
 
 export default function Home() {
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    // const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const selectedFile = event.target.files[0];
-            setSelectedFile(selectedFile);
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('filetype', 'clean');
+            axios.post('http://localhost:5000/api/populate_table', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+                .then(response => {
+                    // Handle success
+                    console.log('File uploaded successfully:', response.data);
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error uploading file:', error);
+                });
         }
     };
 
@@ -41,6 +57,7 @@ export default function Home() {
                                     </Button>
                                 </label>
                                 <input
+                                    accept=".xlsx"
                                     style={{display: 'none'}}
                                     id="clean-file"
                                     type="file"

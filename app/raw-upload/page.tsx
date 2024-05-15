@@ -1,19 +1,36 @@
 'use client'
 import React from 'react';
 import Header from '../Components/Header';
-import Table from '../Components/Table';
+import Table, {QuestionBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from '@mui/icons-material/Send';
+import axios from 'axios';
 
 export default function Home() {
     // const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [tableData, setTableData] = React.useState<QuestionBodyInterface[]>();
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const selectedFile = event.target.files[0];
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('filetype', 'raw');
+            axios.post('http://localhost:5000/api/populate_table', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+                .then(response => {
+                    console.log(response.data["columns"])
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error uploading file:', error);
+                });
         }
-        };
+    };
 
 
     return (
