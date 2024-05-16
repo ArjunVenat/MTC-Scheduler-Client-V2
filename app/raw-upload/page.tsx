@@ -1,19 +1,28 @@
 'use client'
-import React from 'react';
+import React, {useEffect} from 'react';
 import Header from '../Components/Header';
-import Table, {QuestionBodyInterface} from '../Components/Table';
+import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
 
 export default function Home() {
-    // const [selectedFile, setSelectedFile] = useState<File | null>(null);
-    const [tableData, setTableData] = React.useState<QuestionBodyInterface[]>();
+    const [questionsTableData, setQuestionsTableData] = React.useState<QuestionBodyInterface[]>([]);
+    const [rawFile, setRawFile] = React.useState<File | null>();
+
+    useEffect(() => {
+        const questionsTable = localStorage.getItem("questionsTable");
+        if (questionsTable) {
+            const parsedData = JSON.parse(questionsTable);
+            setQuestionsTableData(parsedData.sampleData);
+        }
+    }, []);
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const selectedFile = event.target.files[0];
+            setRawFile(selectedFile);
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('filetype', 'raw');
@@ -23,7 +32,14 @@ export default function Home() {
                 },
             })
                 .then(response => {
-                    console.log(response.data["columns"])
+                    const newData = response.data["columns"];
+                    const newTableData: QuestionBodyInterface[] = newData.map((item: string) => ({
+                        questionText: item,
+                        desiredCol: item,
+                        include: true
+                    }));
+                    console.log(newTableData);
+                    setQuestionsTableData(newTableData);
                 })
                 .catch(error => {
                     // Handle error
@@ -31,6 +47,35 @@ export default function Home() {
                 });
         }
     };
+
+    function handleSubmitClick() {
+        const questionsTable = localStorage.getItem("questionsTable");
+        if (questionsTable) {
+            const parsedData = JSON.parse(questionsTable);
+            console.log(parsedData);
+        }
+
+        // if (rawFile && questionsTableData.length > 0) { // Check if questionsTableData is not empty
+        //     const formData = new FormData();
+        //     const mapping = questionsTableData.reduce((acc, question) => {
+        //         return { ...acc, [question.questionText]: question.desiredCol };
+        //     }, {});
+        //     console.log(mapping);
+        //     formData.append('file', rawFile); // Convert mapping to JSON string
+        //     formData.append('mapping', JSON.stringify(mapping)); // Convert mapping to JSON string
+        //     axios.post('http://localhost:5000/api/clean_raw', formData, {
+        //         headers: {
+        //             'Content-Type': 'multipart/form-data',
+        //         },
+        //     }).then(response => {
+        //         console.log(response.data);
+        //     })
+        //         .catch(error => {
+        //             // Handle error
+        //             console.error('Error uploading file:', error);
+        //         });
+        // }
+    }
 
 
     return (
@@ -65,7 +110,7 @@ export default function Home() {
                                         />
                                     </h2>
                                 </div>
-                            <Table type="questions"/>
+                            <Table type="questions" data={questionsTableData} setTableData={() => setQuestionsTableData}/>
                             <div className="flex flex-col items-center mt-8">
                                 <h2 className="text-2xl font-sans font-semibold mb-4">
                                 Submit Choices To Get Clean Data: {' '}
@@ -76,7 +121,9 @@ export default function Home() {
                                             backgroundColor: "#AC2B37", '&:hover': {
                                                 backgroundColor: "#AC2B37", // Change this to the desired hover color
                                                 }
-                                            }}>
+                                            }}
+                                        onClick={handleSubmitClick}
+                                >
                                         Submit
                                 </Button>
                             </h2>

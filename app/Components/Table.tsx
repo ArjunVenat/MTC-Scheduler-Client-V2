@@ -1,5 +1,5 @@
 'use client'
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import UndoIcon from '@mui/icons-material/Undo';
@@ -8,9 +8,10 @@ import {Checkbox, TextField, RadioGroup, FormControlLabel, Radio} from "@mui/mat
 
 interface TableInterface {
   type: "questions" | "workers";
-  data?: QuestionBodyInterface[] | WorkersBodyInterface[];
+  data: QuestionBodyInterface[] | WorkersBodyInterface[];
   setTableData: (data: QuestionBodyInterface[] | WorkersBodyInterface[]) => void;
 }
+
 
 export interface QuestionBodyInterface {
   questionText: string;
@@ -32,20 +33,44 @@ interface RowEditFlag {
 }
 
 export default function Table(props: TableInterface) {
-    const headers: string[] = props.type === "questions" ? ["Desired Output Column Name", "Include in Model"] : ["Name", "Position", "Social Credit Score", "Prioritize?"];
+    const headers: string[] = props.type === "questions" ? ["Question Text", "Desired Output Column Name", "Include in Model"] : ["Name", "Position", "Social Credit Score", "Prioritize?"];
+    const { type, data } = props;
 
-    const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>([
-        {questionText: "\"Name\"", desiredCol: "\"Name\"", include: true},
-        {questionText: "\"Select Your Position\"", desiredCol: "\"Position\"", include: true},
-        {questionText: "\"Which of the following courses do feel qualified to help with\"", desiredCol: "\"Qualifications\"", include: false}
-    ]);
+    const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>(() => {
+        const storedData = localStorage.getItem("questionsTable");
+        return storedData ? JSON.parse(storedData).sampleData : [];
+    });
 
-    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>(
-        [
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true},
-            {name: "Arjun Venat", position: "PLA", creditScore: 3, prioritize: true}]
-    )
+    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>(() => {
+        const storedData = localStorage.getItem("workersTable");
+        return storedData ? JSON.parse(storedData).sampleData2 : [];
+    });
+
+    const initialState: RowEditFlag[] = sampleData.map((_, i) => ({ row: i, isEditing: false, currentState: sampleData[i].desiredCol }));
+    const [rowEditFlag, setRowEditFlag] = useState<RowEditFlag[]>(initialState);
+
+    useEffect(() => {
+        if (type === "questions" && Array.isArray(data) && data.every((item) => "questionText" in item)) {
+            console.log(data);
+            setSampleData(data as QuestionBodyInterface[]);
+            const initialState: RowEditFlag[] = data.map((_, i) => ({ row: i, isEditing: false, currentState: (data[i] as QuestionBodyInterface).desiredCol }));
+            setRowEditFlag(initialState)
+        } else if (type === "workers" && Array.isArray(data) && data.every((item) => "name" in item)) {
+            console.log(data);
+            setSampleData2(data as WorkersBodyInterface[]);
+        }
+        console.log(sampleData); // Ensure sampleData is updated
+    }, [type, data]);
+
+    useEffect(() => {
+        localStorage.setItem("questionsTable", JSON.stringify({ type, sampleData }));
+        console.log(sampleData);
+    }, [type, sampleData]);
+
+    useEffect(() => {
+        localStorage.setItem("workersTable", JSON.stringify({ type, sampleData2 }));
+        console.log(sampleData2);
+    }, [type, sampleData2]);
 
     function handleInputChange (row: number, value: string) {
         console.log(value);
@@ -56,8 +81,6 @@ export default function Table(props: TableInterface) {
         });
     }
 
-    const initialState: RowEditFlag[] = sampleData.map((_, i) => ({ row: i, isEditing: false, currentState: sampleData[i].desiredCol }));
-    const [rowEditFlag, setRowEditFlag] = useState<RowEditFlag[]>(initialState);
 
     function handleEditClick(row: number) {
         setRowEditFlag((currentState: RowEditFlag[]) => {
@@ -69,18 +92,21 @@ export default function Table(props: TableInterface) {
 
     function handleSaveClick(row: number){
         console.log(rowEditFlag[row].currentState);
-        setSampleData((currentState: QuestionBodyInterface[]) => {
+        setSampleData((currentState) => {
             const newState = [...currentState];
-            newState[row] = { ...newState[row], desiredCol: rowEditFlag[row].currentState}
+            newState[row] = { ...newState[row], desiredCol: rowEditFlag[row].currentState};
             return newState;
-        }
-        )
+        })
 
         setRowEditFlag((currentState: RowEditFlag[]) => {
             const newState = [...currentState];
             newState[row] = { ...newState[row], isEditing: false};
             return newState;
         })
+
+        const newData = [...sampleData];
+        newData[row].desiredCol = rowEditFlag[row].currentState;
+        props.setTableData(newData);
     }
 
     function handleDeleteClick(row: number){
@@ -92,18 +118,35 @@ export default function Table(props: TableInterface) {
     }
 
     const handleRadioChange = (row: number, value: number) => {
-        setSampleData2((currentState) => {
+        // Update the local state for the selected row
+        setSampleData2((currentState: WorkersBodyInterface[]) => {
             const newState = [...currentState];
-                newState[row] = { ...newState[row], creditScore: value};
-                return newState;
-            });
+            newState[row] = { ...newState[row], creditScore: value };
+            return newState;
+        });
     };
 
+    const handleCheckboxChange = (row: number, checked: boolean) => {
+        // Update the local state for the selected row
+        if (type === "questions") {
+            setSampleData((currentState: QuestionBodyInterface[]) => {
+                const newState = [...currentState];
+                newState[row] = { ...newState[row], include: checked };
+                return newState;
+            });
+        } else if (type === "workers") {
+            setSampleData2((currentState: WorkersBodyInterface[]) => {
+                const newState = [...currentState];
+                newState[row] = { ...newState[row], prioritize: checked };
+                return newState;
+            });
+        }
+    };
 
     return (
         <div className="flex flex-col items-center justify-center">
-            <div className="p-8 overflow-y px-0">
-                <table className="w-full min-w-max table-auto text-left">
+            <div className="p-8 overflow-x-auto max-w-full">
+                <table className="w-full table-auto text-left">
                     <thead className="top-0">
                     <tr>
                         {headers.map((header, i) => (
@@ -122,52 +165,52 @@ export default function Table(props: TableInterface) {
                             {/*        <p className="block antialiased font-sans text-lg leading-normal text-blue-gray-900 font-normal">{row.dataCollected}</p>*/}
                             {/*    </div>*/}
                             {/*</td>*/}
-                            <td className="p-8 border-b border-blue-gray-50">
+                            <td className="border border-blue-gray-100 p-3 sm:p-6">
                                 <div className="flex items-center gap-3">
-                                    <p className="block antialiased font-sans text-lg leading-normal text-blue-gray-900 font-normal whitespace-normal">{row.questionText}</p>
+                                    <p className="text-base sm:text-lg font-normal">{row.questionText}</p>
                                 </div>
                             </td>
-                            <td className="p-8 border-b border-blue-gray-50">
+                            <td className="border border-blue-gray-100 p-3 sm:p-6">
                                 <div className="flex justify-between items-center gap-3">
-                                    {!rowEditFlag[i].isEditing && (<p className="block antialiased font-sans text-lg leading-normal text-blue-gray-900 font-normal">{row.desiredCol}</p>)}
-                                    {rowEditFlag[i].isEditing && (<TextField
+                                    {!rowEditFlag[i].isEditing && (
+                                        <p className="text-base sm:text-lg font-normal">{row.desiredCol}</p>)}
+                                    {rowEditFlag[i].isEditing && (
+                                        <TextField
                                         variant="standard"
                                         value={rowEditFlag[i].isEditing ? rowEditFlag[i].currentState : sampleData[i].desiredCol}
                                         onChange={(e) => handleInputChange(i, e.target.value)}
                                         sx={{
-                                            '& .MuiInput-underline:after': { borderBottomColor: '#AC2B37' },
+                                            '& .MuiInput-underline:after': {borderBottomColor: '#AC2B37'},
                                         }}
                                     />)}
                                     <div>
                                         {rowEditFlag[i].isEditing && (
                                             <Tooltip title={"Save"} arrow>
-                                                <button className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleSaveClick(i)}><SaveIcon/>
-                                                </button>
+                                                <button className="p-3 hover:bg-slate-200/70 rounded-xl"
+                                                        onClick={(e) => handleSaveClick(i)}><SaveIcon/></button>
                                             </Tooltip>
                                         )}
                                         {rowEditFlag[i].isEditing && (
                                             <Tooltip title={"Undo"} arrow>
-                                                <button
-                                                    className="p-3 hover:bg-slate-200/70 rounded-xl" onClick={(e) => handleDeleteClick(i)}><UndoIcon/>
-                                                </button>
+                                                <button className="p-3 hover:bg-slate-200/70 rounded-xl"
+                                                        onClick={(e) => handleDeleteClick(i)}><UndoIcon/></button>
                                             </Tooltip>
                                         )}
-
                                     </div>
                                     {!rowEditFlag[i].isEditing && (
                                         <Tooltip title={"Edit"}>
                                             <button className="p-3 hover:bg-slate-200/70 rounded-xl"
-                                                  onClick={(e) => handleEditClick(i)}><EditIcon/>
-                                            </button>
+                                                    onClick={(e) => handleEditClick(i)}><EditIcon/></button>
                                         </Tooltip>
                                     )}
                                 </div>
                             </td>
-                            <td className="p-8 border-b border-blue-gray-50">
-                                <div className="flex justify-between items-center gap-3">
-                                    <Checkbox sx={{color: 'black', '&.Mui-checked': {
-                                            color: "#AC2B37",
-                                        }}} />
+                            <td className="border border-blue-gray-100 p-3 sm:p-6">
+                                <div className="flex justify-center items-center gap-3">
+                                    <Checkbox sx={{color: 'black', '&.Mui-checked': {color: "#AC2B37"}}}
+                                              checked={row.include}
+                                              onChange={(e) => handleCheckboxChange(i, e.target.checked)}
+                                    />
                                 </div>
                             </td>
                         </tr>
@@ -188,29 +231,36 @@ export default function Table(props: TableInterface) {
                             <td className="border-b border-blue-gray-50">
                                 <RadioGroup row={true}>
                                     {[1, 2, 3, 4, 5].map((value) => (
-                                    <FormControlLabel
-                                        key={value}
-                                        value={value.toString()}
-                                        control={
-                                            <Radio
-                                                checked={sampleData2[i].creditScore === value}
-                                                onClick={(e) => handleRadioChange(i, value)}
-                                                sx={{color: 'gray', '&.Mui-checked': {
-                                                        color: "#AC2B37",
-                                                    }}}
-                                            />
-                                        }
-                                        label={value.toString()}
-                                        labelPlacement="top"
-                                    />
-                                ))}
+                                        <FormControlLabel
+                                            key={value}
+                                            value={value.toString()}
+                                            control={
+                                                <Radio
+                                                    checked={sampleData2[i].creditScore === value}
+                                                    onClick={(e) => handleRadioChange(i, value)}
+                                                    sx={{
+                                                        color: 'gray', '&.Mui-checked': {
+                                                            color: "#AC2B37",
+                                                        }
+                                                    }}
+                                                />
+                                            }
+                                            label={value.toString()}
+                                            labelPlacement="top"
+                                        />
+                                    ))}
                                 </RadioGroup>
                             </td>
                             <td className="p-8 border-b border-blue-gray-50">
                                 <div className="flex justify-between items-center gap-3">
-                                    <Checkbox sx={{color: 'black', '&.Mui-checked': {
+                                    <Checkbox sx={{
+                                        color: 'black', '&.Mui-checked': {
                                             color: "#AC2B37",
-                                        }}} />
+                                        }
+                                    }}
+                                              checked={row.prioritize}
+                                              onChange={(e) => handleCheckboxChange(i, e.target.checked)}
+                                    />
                                 </div>
                             </td>
                         </tr>
