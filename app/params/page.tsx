@@ -115,7 +115,7 @@ export default function Home() {
                         </div>
                                 <MinMaxTable startDay={selectedDays[0]} endDay={selectedDays[1]}
                                              startTime={selectedTime[0]} endTime={selectedTime[1]}
-                                             tableState={tableState}
+                                             tableState={tableState} defaultTableState={initialState}
                                              setTableState={handleTableStateChange}
                                 />
                     </div>
