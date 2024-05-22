@@ -6,6 +6,7 @@ import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
+import SaveIcon from "@mui/icons-material/Save";
 
 export default function Home() {
     const [workersTableData, setWorkersTableData] = React.useState<WorkersBodyInterface[]>([]);
@@ -23,30 +24,36 @@ export default function Home() {
         if (event.target.files) {
             const selectedFile = event.target.files[0];
             setCleanFile(selectedFile);
-            const formData = new FormData();
-            formData.append('file', selectedFile);
-            formData.append('filetype', 'clean');
-            axios.post('http://localhost:5000/api/populate_table', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
-                .then(response => {
-                    // Handle success
-                    console.log('File uploaded successfully:', response.data);
-                    const res = response.data
-                    const workersData = Object.keys(res.Name).map((key) => ({
-                        name: res.Name[key],
-                        position: res.Position[key],
-                        creditScore: res.social_credit_score[key],
-                        prioritize: res["prioritized?"][key] === 'Yes'
-                    }));
-                    setWorkersTableData(workersData)
+            const reader = new FileReader();
+            reader.onload = () => {
+                const base64String = reader.result;
+                localStorage.setItem('cleanFile', base64String as string);
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                formData.append('filetype', 'clean');
+                axios.post('http://localhost:5000/api/populate_table', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
                 })
-                .catch(error => {
-                    // Handle error
-                    console.error('Error uploading file:', error);
-                });
+                    .then(response => {
+                        // Handle success
+                        console.log('File uploaded successfully:', response.data);
+                        const res = response.data
+                        const workersData = Object.keys(res.Name).map((key) => ({
+                            name: res.Name[key],
+                            position: res.Position[key],
+                            creditScore: res.social_credit_score[key],
+                            prioritize: res["prioritized?"][key] === 'Yes'
+                        }));
+                        setWorkersTableData(workersData)
+                    })
+                    .catch(error => {
+                        // Handle error
+                        console.error('Error uploading file:', error);
+                    });
+            }
+            reader.readAsArrayBuffer(selectedFile);
         }
     }
 
@@ -105,14 +112,14 @@ export default function Home() {
                                 Submit Choices to Re-Clean Data: {' '}
                                 <Button variant={"contained"}
                                         size="large"
-                                        endIcon={<SendIcon/>}
+                                        endIcon={<SaveIcon/>}
                                         sx={{
                                             backgroundColor: "#AC2B37", '&:hover': {
                                                 backgroundColor: "#AC2B37", // Change this to the desired hover color
                                             }
                                         }}
                                         onClick={handleSubmitClick}>
-                                    Upload
+                                    Save
                                 </Button>
                             </h2>
                         </div>

@@ -1,7 +1,7 @@
 'use client'
 import React, {useEffect} from 'react';
 import Header from '../Components/Header';
-import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
+import Table, {QuestionBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from '@mui/icons-material/Send';
@@ -15,6 +15,7 @@ export default function Home() {
         const questionsTable = localStorage.getItem("questionsTable");
         if (questionsTable) {
             const parsedData = JSON.parse(questionsTable);
+            console.log(parsedData);
             setQuestionsTableData(parsedData.sampleData);
         }
     }, []);
@@ -35,7 +36,7 @@ export default function Home() {
                     const newData = response.data["columns"];
                     const newTableData: QuestionBodyInterface[] = newData.map((item: string) => ({
                         questionText: item,
-                        desiredCol: item,
+                        desiredCol: "Exclude",
                         include: true
                     }));
                     console.log(newTableData);
@@ -48,33 +49,55 @@ export default function Home() {
         }
     };
 
+    function downloadBlob(blob: Blob, filePath: string) {
+        const blobURL = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = blobURL;
+        link.download = filePath;
+
+        document.body.appendChild(link);
+
+        link.dispatchEvent(
+            new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+            }),
+        );
+
+        document.body.removeChild(link);
+    }
+
     function handleSubmitClick() {
         const questionsTable = localStorage.getItem("questionsTable");
         if (questionsTable) {
             const parsedData = JSON.parse(questionsTable);
-            console.log(parsedData);
+            console.log(parsedData.sampleData);
+            if (rawFile && parsedData.sampleData.length > 0) {
+                const formData = new FormData();
+                const mapping = parsedData.sampleData.reduce((acc: QuestionBodyInterface, question: QuestionBodyInterface) => {
+                    return { ...acc, [question.questionText]: question.desiredCol };
+                }, {});
+                console.log(mapping);
+                formData.append('file', rawFile);
+                formData.append('mapping', JSON.stringify(mapping));
+                axios.post('http://localhost:5000/api/clean_raw', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    responseType: 'blob',
+                }).then(response => {
+                    const blob = response.data;
+                    downloadBlob(blob, 'cleaned-responses.xlsx');
+                })
+                    .catch(error => {
+                        // Handle error
+                        console.error('Error uploading file:', error);
+                    });
+            }
         }
-
-        // if (rawFile && questionsTableData.length > 0) { // Check if questionsTableData is not empty
-        //     const formData = new FormData();
-        //     const mapping = questionsTableData.reduce((acc, question) => {
-        //         return { ...acc, [question.questionText]: question.desiredCol };
-        //     }, {});
-        //     console.log(mapping);
-        //     formData.append('file', rawFile); // Convert mapping to JSON string
-        //     formData.append('mapping', JSON.stringify(mapping)); // Convert mapping to JSON string
-        //     axios.post('http://localhost:5000/api/clean_raw', formData, {
-        //         headers: {
-        //             'Content-Type': 'multipart/form-data',
-        //         },
-        //     }).then(response => {
-        //         console.log(response.data);
-        //     })
-        //         .catch(error => {
-        //             // Handle error
-        //             console.error('Error uploading file:', error);
-        //         });
-        // }
     }
 
 
