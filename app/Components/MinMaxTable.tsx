@@ -32,6 +32,14 @@ export default function MinMaxTable(props: MinMaxTableProps){
         return storedData ? JSON.parse(storedData) : [];
     });
 
+    useEffect(() => {
+        const tempTableData = localStorage.getItem("hoursTable");
+        if (tempTableData){
+            const parsedTableData = JSON.stringify(tableData);
+            console.log(parsedTableData);
+        }
+    }, []);
+
     function handleMinMaxChange(day: number, time: number, newNum: number, type: "min" | "max") {
         const newState = tableData.dayTimeMinMax.map((dayArray, i) => {
             if (i === day) {
@@ -50,40 +58,11 @@ export default function MinMaxTable(props: MinMaxTableProps){
         });
         console.log('New state:', newState);
         setTableData({ dayTimeMinMax: newState });
-        localStorage.setItem("hoursTable", JSON.stringify({ dayTimeMinMax: newState }));
     }
 
     function handleSubmitClick() {
-        const fileBlob = localStorage.getItem("cleanFile");
-
-        if (fileBlob) {
-            // Create a File object from the Blob
-            const fileName = "cleanFile.xlsx"; // You can specify the file name
-            const file = new File([JSON.parse(fileBlob)], fileName, { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-
-            // Create FormData and append file and other data
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('hoursTable', JSON.stringify(tableData));
-            formData.append('daySplice', daySplice.join(","));
-            formData.append('timeSplice', timeSplice.join(","));
-
-            console.log('Submitting form data:', formData);
-
-            axios.post('http://localhost:5000/api/get_solution', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                }
-            })
-                .then(response => {
-                    console.log('Response:', response.data);
-                    // Handle response if needed
-                })
-                .catch(error => {
-                    console.error('Error submitting form data:', error);
-                    // Handle error if needed
-                });
-        }
+        localStorage.setItem("hoursTable", JSON.stringify(tableData));
+        console.log(localStorage.getItem("hoursTable"));
     }
 
 

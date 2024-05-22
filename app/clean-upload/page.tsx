@@ -1,12 +1,13 @@
 'use client'
 import React, {useEffect, useState} from 'react';
 import Header from '../Components/Header';
-import Table, {WorkersBodyInterface} from '../Components/Table';
+import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 import SaveIcon from "@mui/icons-material/Save";
+import {downloadBlob} from "@/app/Functions/DownloadBlob";
 
 export default function Home() {
     const [workersTableData, setWorkersTableData] = React.useState<WorkersBodyInterface[]>([]);
@@ -57,20 +58,35 @@ export default function Home() {
         }
     }
 
-    function handleSubmitClick(){
+    function handleSubmitClick() {
         const workersTable = localStorage.getItem("workersTable");
         if (workersTable) {
             const parsedData = JSON.parse(workersTable);
-            console.log(parsedData);
-        }
+            console.log(parsedData.sampleData2);
+            if (cleanFile && parsedData.sampleData2.length > 0) {
+                const hoursTable = localStorage.getItem('hoursTable');
+                if (hoursTable){
+                    const formData = new FormData();
+                    formData.append('file', cleanFile);
+                    formData.append('parameterTableOutput', JSON.stringify(workersTableData));
+                    formData.append('hoursTable', hoursTable);
 
-        // if (cleanFile){
-        //     const formData = new FormData();
-        //     formData.append('file', cleanFile);
-        //     formData.append('filetype', 'clean');
-        //
-        // }
-        // console.log(workersTableData);
+                    axios.post('http://localhost:5000/api/get_solution', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                        responseType: 'blob',
+                    }).then(response => {
+                        const blob = response.data;
+                        downloadBlob(blob, 'shift-assignments.xlsx');
+                    }).catch(error => {
+                        // Handle error
+                        console.error('Error uploading file:', error);
+                    });
+                }
+
+            }
+        }
     }
 
     return (

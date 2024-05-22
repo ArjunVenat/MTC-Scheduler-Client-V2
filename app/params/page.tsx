@@ -26,30 +26,6 @@ export default function Home() {
 
     const [tableState, setTableState] = useState<MinMaxTableState>(initialState);
 
-    const [isLoading, setIsLoading] = useState(true);
-
-
-    useEffect(() => {
-        const hoursTable = localStorage.getItem('hoursTable');
-        if (hoursTable) {
-            const parsedData = JSON.parse(hoursTable);
-            console.log('Parsed data from local storage:', parsedData);
-            setTableState(parsedData);
-        } else {
-            console.log('No data in local storage. Initial state:', initialState);
-            setTableState(initialState);
-        }
-        setIsLoading(false);
-    }, []);
-
-    useEffect(() => {
-        localStorage.setItem('hoursTable', JSON.stringify(tableState));
-    }, []);
-
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
-
 
     function handleDayChange (event: Event, newValue: number | number[]) {
         setSelectedDays((prevState) => {

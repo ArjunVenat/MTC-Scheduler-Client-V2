@@ -6,6 +6,7 @@ import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
+import {downloadBlob} from "@/app/Functions/DownloadBlob";
 
 export default function Home() {
     const [questionsTableData, setQuestionsTableData] = React.useState<QuestionBodyInterface[]>([]);
@@ -48,27 +49,6 @@ export default function Home() {
                 });
         }
     };
-
-    function downloadBlob(blob: Blob, filePath: string) {
-        const blobURL = URL.createObjectURL(blob);
-
-        const link = document.createElement("a");
-
-        link.href = blobURL;
-        link.download = filePath;
-
-        document.body.appendChild(link);
-
-        link.dispatchEvent(
-            new MouseEvent("click", {
-                bubbles: true,
-                cancelable: true,
-                view: window,
-            }),
-        );
-
-        document.body.removeChild(link);
-    }
 
     function handleSubmitClick() {
         const questionsTable = localStorage.getItem("questionsTable");
