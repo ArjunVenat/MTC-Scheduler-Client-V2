@@ -1,19 +1,104 @@
 'use client'
-import React from 'react';
+import React, {useEffect} from 'react';
 import Header from '../Components/Header';
-import Table from '../Components/Table';
+import Table, {QuestionBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from '@mui/icons-material/Send';
+import axios from 'axios';
 
 export default function Home() {
-    // const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [questionsTableData, setQuestionsTableData] = React.useState<QuestionBodyInterface[]>([]);
+    const [rawFile, setRawFile] = React.useState<File | null>();
+
+    useEffect(() => {
+        const questionsTable = localStorage.getItem("questionsTable");
+        if (questionsTable) {
+            const parsedData = JSON.parse(questionsTable);
+            console.log(parsedData);
+            setQuestionsTableData(parsedData.sampleData);
+        }
+    }, []);
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
             const selectedFile = event.target.files[0];
+            setRawFile(selectedFile);
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('filetype', 'raw');
+            axios.post('http://localhost:5000/api/populate_table', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            })
+                .then(response => {
+                    const newData = response.data["columns"];
+                    const newTableData: QuestionBodyInterface[] = newData.map((item: string) => ({
+                        questionText: item,
+                        desiredCol: "Exclude",
+                        include: true
+                    }));
+                    console.log(newTableData);
+                    setQuestionsTableData(newTableData);
+                })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error uploading file:', error);
+                });
         }
-        };
+    };
+
+    function downloadBlob(blob: Blob, filePath: string) {
+        const blobURL = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+
+        link.href = blobURL;
+        link.download = filePath;
+
+        document.body.appendChild(link);
+
+        link.dispatchEvent(
+            new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                view: window,
+            }),
+        );
+
+        document.body.removeChild(link);
+    }
+
+    function handleSubmitClick() {
+        const questionsTable = localStorage.getItem("questionsTable");
+        if (questionsTable) {
+            const parsedData = JSON.parse(questionsTable);
+            console.log(parsedData.sampleData);
+            if (rawFile && parsedData.sampleData.length > 0) {
+                const formData = new FormData();
+                const mapping = parsedData.sampleData.reduce((acc: QuestionBodyInterface, question: QuestionBodyInterface) => {
+                    return { ...acc, [question.questionText]: question.desiredCol };
+                }, {});
+                console.log(mapping);
+                formData.append('file', rawFile);
+                formData.append('mapping', JSON.stringify(mapping));
+                axios.post('http://localhost:5000/api/clean_raw', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    responseType: 'blob',
+                }).then(response => {
+                    const blob = response.data;
+                    downloadBlob(blob, 'cleaned-responses.xlsx');
+                })
+                    .catch(error => {
+                        // Handle error
+                        console.error('Error uploading file:', error);
+                    });
+            }
+        }
+    }
 
 
     return (
@@ -48,7 +133,7 @@ export default function Home() {
                                         />
                                     </h2>
                                 </div>
-                            <Table type="questions"/>
+                            <Table type="questions" data={questionsTableData} setTableData={() => setQuestionsTableData}/>
                             <div className="flex flex-col items-center mt-8">
                                 <h2 className="text-2xl font-sans font-semibold mb-4">
                                 Submit Choices To Get Clean Data: {' '}
@@ -59,7 +144,9 @@ export default function Home() {
                                             backgroundColor: "#AC2B37", '&:hover': {
                                                 backgroundColor: "#AC2B37", // Change this to the desired hover color
                                                 }
-                                            }}>
+                                            }}
+                                        onClick={handleSubmitClick}
+                                >
                                         Submit
                                 </Button>
                             </h2>

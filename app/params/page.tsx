@@ -1,8 +1,7 @@
 'use client'
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Header from '../Components/Header';
 import {Button, Slider} from "@mui/material";
-import SendIcon from '@mui/icons-material/Send';
 import MinMaxTable, {MinMaxTableState} from "@/app/Components/MinMaxTable";
 import SaveIcon from "@mui/icons-material/Save";
 
@@ -11,8 +10,8 @@ export default function Home() {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const time = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm"];
 
-    const [selectedDays, setSelectedDays] = React.useState<string[]>(["Mon", "Fri"]);
-    const [selectedTime, setSelectedTime] = React.useState<string[]>(["8am", "8pm"]);
+    const [selectedDays, setSelectedDays] = useState<string[]>(["Mon", "Fri"]);
+    const [selectedTime, setSelectedTime] = useState<string[]>(["8am", "6pm"]);
 
     const initialState: MinMaxTableState = {
         dayTimeMinMax: []
@@ -26,6 +25,30 @@ export default function Home() {
     }
 
     const [tableState, setTableState] = useState<MinMaxTableState>(initialState);
+
+    const [isLoading, setIsLoading] = useState(true);
+
+
+    useEffect(() => {
+        const hoursTable = localStorage.getItem('hoursTable');
+        if (hoursTable) {
+            const parsedData = JSON.parse(hoursTable);
+            console.log('Parsed data from local storage:', parsedData);
+            setTableState(parsedData);
+        } else {
+            console.log('No data in local storage. Initial state:', initialState);
+            setTableState(initialState);
+        }
+        setIsLoading(false);
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('hoursTable', JSON.stringify(tableState));
+    }, []);
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
 
 
     function handleDayChange (event: Event, newValue: number | number[]) {
@@ -70,13 +93,7 @@ export default function Home() {
         setTableState(newState);
     }
 
-    function handleSubmitClick(){
-        console.log(tableState);
-        if(tableState.dayTimeMinMax.some(row => row.some(entry => entry.min > entry.max))){
-            console.log("Error: Min should not be greater than Max")
-        }
-        localStorage.setItem('tableState', JSON.stringify(tableState));
-    }
+
 
     return (
         <div className="relative h-screen">
@@ -125,24 +142,6 @@ export default function Home() {
                                              tableState={tableState}
                                              setTableState={handleTableStateChange}
                                 />
-                        <div className="flex flex-col items-center mt-8">
-                            <h2 className="text-2xl font-sans font-semibold mb-4">
-                                Save Min and Max Choices: {' '}
-                                <Button variant={"contained"}
-                                        size="large"
-                                        endIcon={<SaveIcon/>}
-                                        sx={{
-                                            backgroundColor: "#AC2B37", '&:hover': {
-                                                backgroundColor: "#AC2B37", // Change this to the desired hover color
-                                            }
-                                        }}
-                                        onClick={handleSubmitClick}
-                                >
-
-                                    Save
-                                </Button>
-                            </h2>
-                        </div>
                     </div>
                 </div>
             </div>
