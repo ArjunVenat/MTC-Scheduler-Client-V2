@@ -1,7 +1,7 @@
 'use client'
 import React, {useEffect} from 'react';
 import Header from '../Components/Header';
-import Table, {QuestionBodyInterface} from '../Components/Table';
+import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SendIcon from '@mui/icons-material/Send';
@@ -11,15 +11,6 @@ import {downloadBlob} from "@/app/Functions/DownloadBlob";
 export default function Home() {
     const [questionsTableData, setQuestionsTableData] = React.useState<QuestionBodyInterface[]>([]);
     const [rawFile, setRawFile] = React.useState<File | null>();
-
-    useEffect(() => {
-        const questionsTable = localStorage.getItem("questionsTable");
-        if (questionsTable) {
-            const parsedData = JSON.parse(questionsTable);
-            console.log(parsedData);
-            setQuestionsTableData(parsedData.sampleData);
-        }
-    }, []);
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -38,45 +29,40 @@ export default function Home() {
                     const newTableData: QuestionBodyInterface[] = newData.map((item: string) => ({
                         questionText: item,
                         desiredCol: "Exclude",
-                        include: true
                     }));
                     console.log(newTableData);
                     setQuestionsTableData(newTableData);
                 })
                 .catch(error => {
-                    // Handle error
                     console.error('Error uploading file:', error);
                 });
         }
     };
 
     function handleSubmitClick() {
-        const questionsTable = localStorage.getItem("questionsTable");
-        if (questionsTable) {
-            const parsedData = JSON.parse(questionsTable);
-            console.log(parsedData.sampleData);
-            if (rawFile && parsedData.sampleData.length > 0) {
-                const formData = new FormData();
-                const mapping = parsedData.sampleData.reduce((acc: QuestionBodyInterface, question: QuestionBodyInterface) => {
-                    return { ...acc, [question.questionText]: question.desiredCol };
-                }, {});
-                console.log(mapping);
-                formData.append('file', rawFile);
-                formData.append('mapping', JSON.stringify(mapping));
-                axios.post('http://localhost:5000/api/clean_raw', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                    responseType: 'blob',
-                }).then(response => {
-                    const blob = response.data;
-                    downloadBlob(blob, 'cleaned-responses.xlsx');
-                })
-                    .catch(error => {
-                        // Handle error
-                        console.error('Error uploading file:', error);
-                    });
-            }
+        if (rawFile && questionsTableData) {
+            const formData = new FormData();
+            formData.append('file', rawFile);
+            formData.append('mapping', JSON.stringify(questionsTableData));
+            axios.post('http://localhost:5000/api/clean_raw', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                responseType: 'blob',
+            }).then(response => {
+                const blob = response.data;
+                downloadBlob(blob, 'cleaned-responses.xlsx');
+            })
+                .catch(error => {
+                    // Handle error
+                    console.error('Error uploading file:', error);
+                });
+        }
+    }
+
+    function handleTableChange(newState: WorkersBodyInterface[] | QuestionBodyInterface[]) {
+        if (Array.isArray(newState) && newState) {
+            setQuestionsTableData(newState as QuestionBodyInterface[]);
         }
     }
 
@@ -113,7 +99,7 @@ export default function Home() {
                                         />
                                     </h2>
                                 </div>
-                            <Table type="questions" data={questionsTableData} setTableData={() => setQuestionsTableData}/>
+                            <Table type="questions" data={questionsTableData} setTableData={handleTableChange}/>
                             <div className="flex flex-col items-center mt-8">
                                 <h2 className="text-2xl font-sans font-semibold mb-4">
                                 Submit Choices To Get Clean Data: {' '}

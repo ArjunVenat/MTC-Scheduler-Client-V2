@@ -26,15 +26,9 @@ export default function Table(props: TableInterface) {
     const { type, data } = props;
     const autocompleteChoices = ["Name", "Position", "Courses", "Max-hours", "Back-to-Back", "Exclude"];
 
-    const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>(() => {
-        const storedData = localStorage.getItem("questionsTable");
-        return storedData ? JSON.parse(storedData).sampleData : [];
-    });
+    const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>([]);
 
-    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>(() => {
-        const storedData = localStorage.getItem("workersTable");
-        return storedData ? JSON.parse(storedData).sampleData2 : [];
-    });
+    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>([]);
 
     useEffect(() => {
         if (type === "questions" && Array.isArray(data) && data.every((item) => "questionText" in item)) {
@@ -59,6 +53,7 @@ export default function Table(props: TableInterface) {
         setSampleData((currentState: QuestionBodyInterface[]) => {
             const newState = [...currentState];
             newState[row] = { ...newState[row], desiredCol: value || "Exclude" };
+            props.setTableData(newState);
             return newState;
         });
     }

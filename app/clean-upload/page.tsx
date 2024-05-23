@@ -6,6 +6,7 @@ import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from "axios";
 import SaveIcon from "@mui/icons-material/Save";
+import SendIcon from '@mui/icons-material/Send';
 import {downloadBlob} from "@/app/Functions/DownloadBlob";
 
 export default function Home() {
@@ -25,7 +26,6 @@ export default function Home() {
                         'Content-Type': 'multipart/form-data',
                     },
             }).then(response => {
-                        // Handle success
                         console.log('File uploaded successfully:', response.data);
                         const res = response.data
                         const workersData = Object.keys(res.Name).map((key) => ({
@@ -43,13 +43,27 @@ export default function Home() {
             }
     }
 
-    // function handleRecleanClick(){
-    //
-    // }
+    function handleRecleanClick(){
+        if (cleanFile && workersTableData){
+            const formData = new FormData();
+            formData.append('file', cleanFile);
+            formData.append('parameterTableOutput', JSON.stringify(workersTableData));
+            axios.post('http://localhost:5000/api/reclean', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                responseType: 'blob',
+            }).then(response => {
+                const blob = response.data;
+                downloadBlob(blob, 'recleaned-responses.xlsx');
+            }).catch(error => {
+                console.error('Error uploading file:', error);
+            })
+        }
+    }
 
     function handleSubmitClick() {
         if (cleanFile && workersTableData) {
-            console.log(workersTableData);
             const hoursTable = localStorage.getItem('hoursTable');
             const daysRange = localStorage.getItem('dayRange');
             const timeRange = localStorage.getItem("timeRange");
@@ -117,9 +131,9 @@ export default function Home() {
                             </h2>
                         </div>
                         <Table type="workers" data={workersTableData} setTableData={handleTableChange}/>
-                        <div className="flex flex-col items-center mt-8">
+                        <div className="flex flex-col flex-grow items-center mt-8">
                             <h2 className="text-2xl font-sans font-semibold mb-4">
-                                Submit Choices to Re-Clean Data: {' '}
+                                Re-Clean Data: {' '} <span>
                                 <Button variant={"contained"}
                                         size="large"
                                         endIcon={<SaveIcon/>}
@@ -128,8 +142,20 @@ export default function Home() {
                                                 backgroundColor: "#AC2B37",
                                             }
                                         }}
-                                        onClick={handleSubmitClick}>
+                                        onClick={handleRecleanClick}>
                                     Save
+                                </Button>
+                                </span> or Click Submit to Solve: {' '}
+                                <Button variant={"contained"}
+                                        size="large"
+                                        endIcon={<SendIcon/>}
+                                        sx={{
+                                            backgroundColor: "#AC2B37", '&:hover': {
+                                                backgroundColor: "#AC2B37",
+                                            }
+                                        }}
+                                        onClick={handleSubmitClick}>
+                                    Submit
                                 </Button>
                             </h2>
                         </div>
