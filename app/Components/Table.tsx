@@ -5,7 +5,7 @@ import {Checkbox, TextField, RadioGroup, FormControlLabel, Radio, Autocomplete} 
 interface TableInterface {
   type: "questions" | "workers";
   data: QuestionBodyInterface[] | WorkersBodyInterface[];
-  setTableData: (data: QuestionBodyInterface[] | WorkersBodyInterface[]) => void;
+  setTableData: (newState: WorkersBodyInterface[] | QuestionBodyInterface[]) => void;
 }
 
 
@@ -26,23 +26,19 @@ export default function Table(props: TableInterface) {
     const { type, data } = props;
     const autocompleteChoices = ["Name", "Position", "Courses", "Max-hours", "Back-to-Back", "Exclude"];
 
-    const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>(() => {
-        const storedData = localStorage.getItem("questionsTable");
-        return storedData ? JSON.parse(storedData).sampleData : [];
-    });
+    const [sampleData, setSampleData] = useState<QuestionBodyInterface[]>([]);
 
-    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>(() => {
-        const storedData = localStorage.getItem("workersTable");
-        return storedData ? JSON.parse(storedData).sampleData2 : [];
-    });
+    const [sampleData2, setSampleData2] = useState<WorkersBodyInterface[]>([]);
 
     useEffect(() => {
         if (type === "questions" && Array.isArray(data) && data.every((item) => "questionText" in item)) {
             console.log(data);
             setSampleData(data as QuestionBodyInterface[]);
+            props.setTableData(data as QuestionBodyInterface[]);
         } else if (type === "workers" && Array.isArray(data) && data.every((item) => "name" in item)) {
             console.log(data);
             setSampleData2(data as WorkersBodyInterface[]);
+            props.setTableData(data as WorkersBodyInterface[]);
         }
         console.log(sampleData); // Ensure sampleData is updated
     }, [type, data]);
@@ -52,46 +48,34 @@ export default function Table(props: TableInterface) {
         console.log(sampleData);
     }, [type, sampleData]);
 
-    useEffect(() => {
-        localStorage.setItem("workersTable", JSON.stringify({ type, sampleData2 }));
-        console.log(sampleData2);
-    }, [type, sampleData2]);
 
     function handleInputChange(row: number, value: string) {
-        console.log(value);
-        if (type === "questions") {
-            setSampleData((currentState: QuestionBodyInterface[]) => {
-                const newState = [...currentState];
-                newState[row] = { ...newState[row], desiredCol: value || "Exclude" };
-                return newState;
-            });
-        }
+        setSampleData((currentState: QuestionBodyInterface[]) => {
+            const newState = [...currentState];
+            newState[row] = { ...newState[row], desiredCol: value || "Exclude" };
+            props.setTableData(newState);
+            return newState;
+        });
     }
 
     const handleRadioChange = (row: number, value: number) => {
-        // Update the local state for the selected row
         setSampleData2((currentState: WorkersBodyInterface[]) => {
             const newState = [...currentState];
             newState[row] = { ...newState[row], creditScore: value };
+            console.log(newState);
+            props.setTableData(newState);
             return newState;
         });
     };
 
     const handleCheckboxChange = (row: number, checked: boolean) => {
-        // Update the local state for the selected row
-        if (type === "questions") {
-            setSampleData((currentState: QuestionBodyInterface[]) => {
-                const newState = [...currentState];
-                newState[row] = { ...newState[row] };
-                return newState;
-            });
-        } else if (type === "workers") {
-            setSampleData2((currentState: WorkersBodyInterface[]) => {
-                const newState = [...currentState];
-                newState[row] = { ...newState[row], prioritize: checked };
-                return newState;
-            });
-        }
+        setSampleData2((currentState: WorkersBodyInterface[]) => {
+            const newState = [...currentState];
+            newState[row] = { ...newState[row], prioritize: checked };
+            console.log(newState);
+            props.setTableData(newState);
+            return newState;
+        });
     };
 
     return (

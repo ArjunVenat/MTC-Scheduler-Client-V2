@@ -4,41 +4,28 @@ import Header from '../Components/Header';
 import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import SendIcon from "@mui/icons-material/Send";
 import axios from "axios";
 import SaveIcon from "@mui/icons-material/Save";
+import SendIcon from '@mui/icons-material/Send';
 import {downloadBlob} from "@/app/Functions/DownloadBlob";
 
 export default function Home() {
-    const [workersTableData, setWorkersTableData] = React.useState<WorkersBodyInterface[]>([]);
-    const [cleanFile, setCleanFile] = React.useState<File | null>();
+    const [workersTableData, setWorkersTableData] = useState<WorkersBodyInterface[]>([]);
+    const [cleanFile, setCleanFile] = useState<File | null>();
 
-    useEffect(() => {
-        const workersTable = localStorage.getItem("workersTable");
-        if (workersTable) {
-            const parsedData = JSON.parse(workersTable);
-            setWorkersTableData(parsedData.sampleData2);
-        }
-    }, []);
 
     function handleFileSelect (event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.files) {
             const selectedFile = event.target.files[0];
             setCleanFile(selectedFile);
-            const reader = new FileReader();
-            reader.onload = () => {
-                const base64String = reader.result;
-                localStorage.setItem('cleanFile', base64String as string);
-                const formData = new FormData();
-                formData.append('file', selectedFile);
-                formData.append('filetype', 'clean');
-                axios.post('http://localhost:5000/api/populate_table', formData, {
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('filetype', 'clean');
+            axios.post('http://localhost:5000/api/populate_table', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
-                })
-                    .then(response => {
-                        // Handle success
+            }).then(response => {
                         console.log('File uploaded successfully:', response.data);
                         const res = response.data
                         const workersData = Object.keys(res.Name).map((key) => ({
@@ -54,40 +41,61 @@ export default function Home() {
                         console.error('Error uploading file:', error);
                     });
             }
-            reader.readAsArrayBuffer(selectedFile);
+    }
+
+    function handleRecleanClick(){
+        if (cleanFile && workersTableData){
+            const formData = new FormData();
+            formData.append('file', cleanFile);
+            formData.append('parameterTableOutput', JSON.stringify(workersTableData));
+            axios.post('http://localhost:5000/api/reclean', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                responseType: 'blob',
+            }).then(response => {
+                const blob = response.data;
+                downloadBlob(blob, 'recleaned-responses.xlsx');
+            }).catch(error => {
+                console.error('Error uploading file:', error);
+            })
         }
     }
 
     function handleSubmitClick() {
-        const workersTable = localStorage.getItem("workersTable");
-        if (workersTable) {
-            const parsedData = JSON.parse(workersTable);
-            console.log(parsedData.sampleData2);
-            if (cleanFile && parsedData.sampleData2.length > 0) {
-                const hoursTable = localStorage.getItem('hoursTable');
-                if (hoursTable){
-                    const formData = new FormData();
-                    formData.append('file', cleanFile);
-                    formData.append('parameterTableOutput', JSON.stringify(workersTableData));
-                    formData.append('hoursTable', hoursTable);
+        if (cleanFile && workersTableData) {
+            const hoursTable = localStorage.getItem('hoursTable');
+            const daysRange = localStorage.getItem('dayRange');
+            const timeRange = localStorage.getItem("timeRange");
+            if (hoursTable && daysRange && timeRange){
+                const formData = new FormData();
+                formData.append('file', cleanFile);
+                formData.append('parameterTableOutput', JSON.stringify(workersTableData));
+                formData.append('hoursTable', hoursTable);
+                formData.append("dayRange", daysRange);
+                formData.append("timeRange", timeRange);
 
-                    axios.post('http://localhost:5000/api/get_solution', formData, {
-                        headers: {
-                            'Content-Type': 'multipart/form-data',
-                        },
-                        responseType: 'blob',
-                    }).then(response => {
-                        const blob = response.data;
-                        downloadBlob(blob, 'shift-assignments.xlsx');
-                    }).catch(error => {
-                        // Handle error
-                        console.error('Error uploading file:', error);
-                    });
-                }
-
+                axios.post('http://localhost:5000/api/get_solution', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    responseType: 'blob',
+                }).then(response => {
+                    const blob = response.data;
+                    downloadBlob(blob, 'shift-assignments.xlsx');
+                }).catch(error => {
+                    console.error('Error uploading file:', error);
+                });
             }
         }
     }
+
+    function handleTableChange(newState: WorkersBodyInterface[] | QuestionBodyInterface[]) {
+        if (Array.isArray(newState) && newState) {
+            setWorkersTableData(newState as WorkersBodyInterface[]);
+        }
+    }
+
 
     return (
         <div className="relative h-screen">
@@ -122,20 +130,32 @@ export default function Home() {
                                 />
                             </h2>
                         </div>
-                        <Table type="workers" data={workersTableData} setTableData={() => setWorkersTableData}/>
-                        <div className="flex flex-col items-center mt-8">
+                        <Table type="workers" data={workersTableData} setTableData={handleTableChange}/>
+                        <div className="flex flex-col flex-grow items-center mt-8">
                             <h2 className="text-2xl font-sans font-semibold mb-4">
-                                Submit Choices to Re-Clean Data: {' '}
+                                Re-Clean Data: {' '} <span>
                                 <Button variant={"contained"}
                                         size="large"
                                         endIcon={<SaveIcon/>}
                                         sx={{
                                             backgroundColor: "#AC2B37", '&:hover': {
-                                                backgroundColor: "#AC2B37", // Change this to the desired hover color
+                                                backgroundColor: "#AC2B37",
+                                            }
+                                        }}
+                                        onClick={handleRecleanClick}>
+                                    Save
+                                </Button>
+                                </span> or Click Submit to Solve: {' '}
+                                <Button variant={"contained"}
+                                        size="large"
+                                        endIcon={<SendIcon/>}
+                                        sx={{
+                                            backgroundColor: "#AC2B37", '&:hover': {
+                                                backgroundColor: "#AC2B37",
                                             }
                                         }}
                                         onClick={handleSubmitClick}>
-                                    Save
+                                    Submit
                                 </Button>
                             </h2>
                         </div>
