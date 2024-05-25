@@ -11,7 +11,7 @@ export default function Home() {
     const time = ["8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm"];
 
     const [selectedDays, setSelectedDays] = useState<string[]>(["Mon", "Fri"]);
-    const [selectedTime, setSelectedTime] = useState<string[]>(["8am", "6pm"]);
+    const [selectedTime, setSelectedTime] = useState<string[]>(["10am", "6pm"]);
 
     const initialState: MinMaxTableState = {
         dayTimeMinMax: []
