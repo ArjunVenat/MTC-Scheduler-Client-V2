@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect} from 'react';
+import React from 'react';
 import Header from '../Components/Header';
 import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
 import {Button} from "@mui/material";

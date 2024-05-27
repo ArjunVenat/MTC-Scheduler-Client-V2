@@ -2,7 +2,6 @@
 import React, {useEffect, useState} from "react";
 import {Button} from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
-import axios from "axios";
 
 
 interface MinMaxTableProps {
@@ -30,15 +29,22 @@ export default function MinMaxTable(props: MinMaxTableProps){
     daySplice.unshift("");
 
     const [tableData, setTableData] = useState<MinMaxTableState>(() => {
-        const storedData = localStorage.getItem("hoursTable");
-        return storedData ? JSON.parse(storedData) : props.defaultTableState;
+        if (typeof window !== "undefined"){
+            const storedData = localStorage.getItem("hoursTable");
+            return storedData ? JSON.parse(storedData) : props.defaultTableState;
+        }
+        else {
+            return props.defaultTableState;
+        }
     });
 
     useEffect(() => {
-        const tempTableData = localStorage.getItem("hoursTable");
-        if (tempTableData){
-            const parsedTableData = JSON.stringify(tableData);
-            console.log(parsedTableData);
+        if (typeof window !== "undefined"){
+            const tempTableData = localStorage.getItem("hoursTable");
+            if (tempTableData){
+                const parsedTableData = JSON.stringify(tableData);
+                console.log(parsedTableData);
+            }
         }
     }, []);
 
@@ -63,13 +69,11 @@ export default function MinMaxTable(props: MinMaxTableProps){
     }
 
     function handleSubmitClick() {
-        localStorage.setItem("hoursTable", JSON.stringify(tableData));
-        localStorage.setItem("dayRange", JSON.stringify(daySplice.slice(1)));
-        localStorage.setItem("timeRange", JSON.stringify(timeSplice));
-
-        console.log(localStorage.getItem("hoursTable"));
-        console.log(localStorage.getItem("dayRange"));
-        console.log(localStorage.getItem("timeRange"));
+        if (typeof window !== "undefined"){
+            localStorage.setItem("hoursTable", JSON.stringify(tableData));
+            localStorage.setItem("dayRange", JSON.stringify(daySplice.slice(1)));
+            localStorage.setItem("timeRange", JSON.stringify(timeSplice));
+        }
     }
 
 

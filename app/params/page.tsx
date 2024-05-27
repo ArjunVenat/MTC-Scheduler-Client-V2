@@ -1,9 +1,8 @@
 'use client'
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import Header from '../Components/Header';
-import {Button, Slider} from "@mui/material";
+import {Slider} from "@mui/material";
 import MinMaxTable, {MinMaxTableState} from "@/app/Components/MinMaxTable";
-import SaveIcon from "@mui/icons-material/Save";
 
 export default function Home() {
 
