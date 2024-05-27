@@ -19,7 +19,7 @@ export default function Home() {
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('filetype', 'raw');
-            axios.post('http://localhost:5000/api/populate_table', formData, {
+            axios.post('http://mtc-scheduler.wpi.edu/api/populate_table', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -44,7 +44,7 @@ export default function Home() {
             const formData = new FormData();
             formData.append('file', rawFile);
             formData.append('mapping', JSON.stringify(questionsTableData));
-            axios.post('http://localhost:5000/api/clean_raw', formData, {
+            axios.post('http://mtc-scheduler.wpi.edu/api/clean_raw', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
