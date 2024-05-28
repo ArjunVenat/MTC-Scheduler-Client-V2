@@ -2,7 +2,7 @@
 import React, {useState} from 'react';
 import Header from '../Components/Header';
 import Table, {QuestionBodyInterface, WorkersBodyInterface} from '../Components/Table';
-import {Button} from "@mui/material";
+import {Alert, Button, Snackbar} from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from "axios";
 import SaveIcon from "@mui/icons-material/Save";
@@ -12,7 +12,9 @@ import {downloadBlob} from "@/app/Functions/DownloadBlob";
 export default function Home() {
     const [workersTableData, setWorkersTableData] = useState<WorkersBodyInterface[]>([]);
     const [cleanFile, setCleanFile] = useState<File | null>();
-
+    const [isInfeasible, setIsInfeasible] = useState<boolean>(false);
+    const [snackbarMsg, setSnackbarMsg] = useState<string>("Success");
+    const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
 
     function handleFileSelect (event: React.ChangeEvent<HTMLInputElement>) {
         if (event.target.files) {
@@ -22,6 +24,7 @@ export default function Home() {
             formData.append('file', selectedFile);
             formData.append('filetype', 'clean');
             axios.post('http://mtc-scheduler.wpi.edu/api/populate_table', formData, {
+                    // mtc-scheduler.wpi.edu
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -75,17 +78,35 @@ export default function Home() {
                 formData.append("dayRange", daysRange);
                 formData.append("timeRange", timeRange);
 
-                axios.post('http://mtc-scheduler.wpi.edu/api/get_solution', formData, {
+                axios.post('http://mtc-scheduler.wpi.edu/api/feasibility_check', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
-                    responseType: 'blob',
                 }).then(response => {
-                    const blob = response.data;
-                    downloadBlob(blob, 'shift-assignments.xlsx');
+                    console.log(response);
+                    setSnackbarMsg(response.data["message"]);
+                    setIsInfeasible(response.data["statusFlag"]);
+                    setSnackbarOpen(true);
+
+                    if (response.data["statusFlag"] === true){
+                        axios.post('http://mtc-scheduler.wpi.edu/api/get_solution', formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                            responseType: 'blob',
+                        }).then(response => {
+                            const blob = response.data;
+                            downloadBlob(blob, 'shift-assignments.xlsx');
+                        }).catch(error => {
+                            console.error('Error uploading file:', error);
+                        });
+                    }
                 }).catch(error => {
                     console.error('Error uploading file:', error);
-                });
+                })
+
+
+
             }
         }
     }
@@ -94,6 +115,13 @@ export default function Home() {
         if (Array.isArray(newState) && newState) {
             setWorkersTableData(newState as WorkersBodyInterface[]);
         }
+    }
+
+    function handleSnackbarClose(event?: React.SyntheticEvent | Event, reason?: string) {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbarOpen(false);
     }
 
 
@@ -105,6 +133,15 @@ export default function Home() {
                 <div className="h-full overflow-y-auto flex flex-col items-center mt-8">
                     <div className="mb-4">
                         <div className="flex flex-col items-center mt-8">
+                            <Snackbar open={snackbarOpen} autoHideDuration={isInfeasible ? 5000: 3000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+                                <Alert
+                                    severity={isInfeasible ? "error": "success"}
+                                    variant="filled"
+                                    sx={{ width: '100%' }}
+                                >
+                                    {snackbarMsg}
+                                </Alert>
+                            </Snackbar>
                             <h2 className="text-2xl font-sans font-semibold mb-4">
                                 Upload <u>Clean Data</u> File Here: {' '}
                                 <label htmlFor="clean-file">
