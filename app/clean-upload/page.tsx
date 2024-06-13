@@ -79,6 +79,7 @@ export default function Home() {
                 formData.append("timeRange", timeRange);
 
                 axios.post('https://mtc-scheduler.wpi.edu/api/feasibility_check', formData, {
+                    // https://mtc-scheduler.wpi.edu/api/feasibility_check
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -87,8 +88,7 @@ export default function Home() {
                     setSnackbarMsg(response.data["message"]);
                     setIsInfeasible(response.data["statusFlag"]);
                     setSnackbarOpen(true);
-
-                    if (response.data["statusFlag"] === true){
+                    if (!response.data["statusFlag"]){
                         axios.post('https://mtc-scheduler.wpi.edu/api/get_solution', formData, {
                             headers: {
                                 'Content-Type': 'multipart/form-data',
