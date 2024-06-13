@@ -23,7 +23,7 @@ export default function Home() {
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('filetype', 'clean');
-            axios.post('http://mtc-scheduler.wpi.edu/api/populate_table', formData, {
+            axios.post('https://mtc-scheduler.wpi.edu/api/populate_table', formData, {
                     // mtc-scheduler.wpi.edu
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -51,7 +51,7 @@ export default function Home() {
             const formData = new FormData();
             formData.append('file', cleanFile);
             formData.append('parameterTableOutput', JSON.stringify(workersTableData));
-            axios.post('http://mtc-scheduler.wpi.edu/api/reclean', formData, {
+            axios.post('https://mtc-scheduler.wpi.edu/api/reclean', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -78,7 +78,7 @@ export default function Home() {
                 formData.append("dayRange", daysRange);
                 formData.append("timeRange", timeRange);
 
-                axios.post('http://mtc-scheduler.wpi.edu/api/feasibility_check', formData, {
+                axios.post('https://mtc-scheduler.wpi.edu/api/feasibility_check', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -89,7 +89,7 @@ export default function Home() {
                     setSnackbarOpen(true);
 
                     if (response.data["statusFlag"] === true){
-                        axios.post('http://mtc-scheduler.wpi.edu/api/get_solution', formData, {
+                        axios.post('https://mtc-scheduler.wpi.edu/api/get_solution', formData, {
                             headers: {
                                 'Content-Type': 'multipart/form-data',
                             },

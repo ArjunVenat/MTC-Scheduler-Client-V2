@@ -21,7 +21,7 @@ export default function Home() {
             const formData = new FormData();
             formData.append('file', selectedFile);
             formData.append('filetype', 'raw');
-            axios.post('http://mtc-scheduler.wpi.edu/api/populate_table', formData, {
+            axios.post('https://mtc-scheduler.wpi.edu/api/populate_table', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
