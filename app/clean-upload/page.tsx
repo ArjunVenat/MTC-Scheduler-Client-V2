@@ -70,8 +70,6 @@ export default function Home() {
             const hoursTable = localStorage.getItem('hoursTable');
             const daysRange = localStorage.getItem('dayRange');
             const timeRange = localStorage.getItem("timeRange");
-            console.log("submit click");
-            console.log(hoursTable, daysRange, timeRange);
             if (hoursTable && daysRange && timeRange){
                 const formData = new FormData();
                 formData.append('file', cleanFile);
