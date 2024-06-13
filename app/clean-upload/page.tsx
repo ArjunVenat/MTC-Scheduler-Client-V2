@@ -70,6 +70,8 @@ export default function Home() {
             const hoursTable = localStorage.getItem('hoursTable');
             const daysRange = localStorage.getItem('dayRange');
             const timeRange = localStorage.getItem("timeRange");
+            console.log("submit click");
+            console.log(hoursTable, daysRange, timeRange);
             if (hoursTable && daysRange && timeRange){
                 const formData = new FormData();
                 formData.append('file', cleanFile);
@@ -79,6 +81,7 @@ export default function Home() {
                 formData.append("timeRange", timeRange);
 
                 axios.post('https://mtc-scheduler.wpi.edu/api/feasibility_check', formData, {
+                    // https://mtc-scheduler.wpi.edu/api/feasibility_check
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -87,8 +90,7 @@ export default function Home() {
                     setSnackbarMsg(response.data["message"]);
                     setIsInfeasible(response.data["statusFlag"]);
                     setSnackbarOpen(true);
-
-                    if (response.data["statusFlag"] === true){
+                    if (!response.data["statusFlag"]){
                         axios.post('https://mtc-scheduler.wpi.edu/api/get_solution', formData, {
                             headers: {
                                 'Content-Type': 'multipart/form-data',
