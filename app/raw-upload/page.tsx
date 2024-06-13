@@ -64,7 +64,7 @@ export default function Home() {
                 const formData = new FormData();
                 formData.append('file', rawFile);
                 formData.append('mapping', JSON.stringify(questionsTableData));
-                axios.post('http://mtc-scheduler.wpi.edu/api/clean_raw', formData, {
+                axios.post('https://mtc-scheduler.wpi.edu/api/clean_raw', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
