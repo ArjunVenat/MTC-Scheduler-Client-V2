@@ -43,7 +43,7 @@ export default function MinMaxTable(props: MinMaxTableProps){
             const tempTableData = localStorage.getItem("hoursTable");
             if (tempTableData){
                 const parsedTableData = JSON.stringify(tableData);
-                console.log(parsedTableData);
+                // console.log(parsedTableData);
             }
         }
     }, []);
@@ -53,7 +53,7 @@ export default function MinMaxTable(props: MinMaxTableProps){
             if (i === day) {
                 return dayArray.map((timeObject, j) => {
                     if (j === time) {
-                        console.log(`Updating ${type} for day ${day} and time ${time} to ${newNum}`);
+                        // console.log(`Updating ${type} for day ${day} and time ${time} to ${newNum}`);
                         return {
                             ...timeObject,
                             [type]: newNum
@@ -64,7 +64,7 @@ export default function MinMaxTable(props: MinMaxTableProps){
             }
             return dayArray;
         });
-        console.log('New state:', newState);
+        // console.log('New state:', newState);
         setTableData({ dayTimeMinMax: newState });
     }
 
@@ -137,7 +137,7 @@ export default function MinMaxTable(props: MinMaxTableProps){
                                 endIcon={<SaveIcon/>}
                                 sx={{
                                     backgroundColor: "#AC2B37", '&:hover': {
-                                        backgroundColor: "#AC2B37", // Change this to the desired hover color
+                                        backgroundColor: "#AC2B37",
                                     }
                                 }}
                                 onClick={handleSubmitClick}

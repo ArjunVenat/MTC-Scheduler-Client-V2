@@ -32,7 +32,7 @@ export default function Home() {
                         questionText: item,
                         desiredCol: "Exclude",
                     }));
-                    console.log(newTableData);
+                    // console.log(newTableData);
                     setQuestionsTableData(newTableData);
                 })
                 .catch(error => {
@@ -147,7 +147,7 @@ export default function Home() {
                                         endIcon={<SendIcon/>}
                                         sx={{
                                             backgroundColor: "#AC2B37", '&:hover': {
-                                                backgroundColor: "#AC2B37", // Change this to the desired hover color
+                                                backgroundColor: "#AC2B37",
                                                 }
                                             }}
                                         onClick={handleSubmitClick}

@@ -32,20 +32,20 @@ export default function Table(props: TableInterface) {
 
     useEffect(() => {
         if (type === "questions" && Array.isArray(data) && data.every((item) => "questionText" in item)) {
-            console.log(data);
+            // console.log(data);
             setSampleData(data as QuestionBodyInterface[]);
             props.setTableData(data as QuestionBodyInterface[]);
         } else if (type === "workers" && Array.isArray(data) && data.every((item) => "name" in item)) {
-            console.log(data);
+            // console.log(data);
             setSampleData2(data as WorkersBodyInterface[]);
             props.setTableData(data as WorkersBodyInterface[]);
         }
-        console.log(sampleData); // Ensure sampleData is updated
+        // console.log(sampleData);
     }, [type, data]);
 
     useEffect(() => {
         localStorage.setItem("questionsTable", JSON.stringify({ type, sampleData }));
-        console.log(sampleData);
+        // console.log(sampleData);
     }, [type, sampleData]);
 
 
@@ -62,7 +62,7 @@ export default function Table(props: TableInterface) {
         setSampleData2((currentState: WorkersBodyInterface[]) => {
             const newState = [...currentState];
             newState[row] = { ...newState[row], creditScore: value };
-            console.log(newState);
+            // console.log(newState);
             props.setTableData(newState);
             return newState;
         });
@@ -72,7 +72,7 @@ export default function Table(props: TableInterface) {
         setSampleData2((currentState: WorkersBodyInterface[]) => {
             const newState = [...currentState];
             newState[row] = { ...newState[row], prioritize: checked };
-            console.log(newState);
+            // console.log(newState);
             props.setTableData(newState);
             return newState;
         });

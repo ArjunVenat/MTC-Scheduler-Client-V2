@@ -29,7 +29,7 @@ export default function Home() {
                         'Content-Type': 'multipart/form-data',
                     },
             }).then(response => {
-                        console.log('File uploaded successfully:', response.data);
+                        // console.log('File uploaded successfully:', response.data);
                         const res = response.data
                         const workersData = Object.keys(res.Name).map((key) => ({
                             name: res.Name[key],
@@ -84,7 +84,7 @@ export default function Home() {
                         'Content-Type': 'multipart/form-data',
                     },
                 }).then(response => {
-                    console.log(response);
+                    // console.log(response);
                     setSnackbarMsg(response.data["message"]);
                     setIsInfeasible(response.data["statusFlag"]);
                     setSnackbarOpen(true);

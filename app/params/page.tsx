@@ -32,18 +32,18 @@ export default function Home() {
             if (typeof newValue === 'number'){
                 newState[0] = days[newValue];
                 newState[1] = days[newValue];
-                console.log(newState);
+                // console.log(newState);
                 return newState
             }
             else {
                 newState[0] = days[newValue[0]];
                 newState[1] = days[newValue[1]];
-                console.log(newState);
+                // console.log(newState);
                 return newState;
             }
         }
         );
-        console.log(selectedDays);
+        // console.log(selectedDays);
     }
 
     function handleTimeChange (event: Event, newValue: number | number[]) {
@@ -52,13 +52,13 @@ export default function Home() {
             if (typeof newValue === 'number'){
                 newState[0] = time[newValue];
                 newState[1] = time[newValue];
-                console.log(newState);
+                // console.log(newState);
                 return newState;
             }
             else {
                 newState[0] = time[newValue[0]];
                 newState[1] = time[newValue[1]];
-                console.log(newState);
+                // console.log(newState);
                 return newState;
             }
         });
