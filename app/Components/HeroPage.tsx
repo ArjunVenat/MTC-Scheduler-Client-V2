@@ -1,7 +1,7 @@
 
 export default function HeroPage(){
     return (
-        <div className="relative overflow-hidden bg-cover bg-no-repeat bg-[50%] h-[500px] bg-[url('https://tecdn.b-cdn.net/img/new/standard/city/078.jpg')]">
+        <div className="relative overflow-hidden bg-cover bg-no-repeat bg-[50%] h-[500px] bg-[url('/hero-pg-bg.png')]">
         <div className="absolute top-0 right-0 bottom-0 left-0 h-full w-full overflow-hidden bg-fixed bg-[hsla(0,0%,0%,0.75)]">
             <div className="flex h-full items-center justify-center">
                 <div className="px-6 text-center text-white md:px-12">
@@ -14,6 +14,6 @@ export default function HeroPage(){
                 </div>
             </div>
         </div>
-    </div>
+        </div>
     );
 }
